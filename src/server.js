@@ -18,7 +18,12 @@ const setupServer = () => {
 
   app.use(cors());
 
+  // Маршрут для корневого URL
+  app.get('/', (req, res) => {
+    res.send('Welcome to the API! Use /contacts for contact-related endpoints.');
+  });
 
+  // Основной роутер для /contacts
   app.use('/contacts', contactsRouter);
 
   app.listen(PORT, () => {
