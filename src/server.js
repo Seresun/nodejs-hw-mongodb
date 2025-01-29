@@ -27,7 +27,7 @@ export const setupServer = () => {
   app.get('/', async (req, res) => {
     res.status(200).json({
       status: 200,
-      message: 'Hi, it`s working!!!😁',
+      message: 'it`s working!',
     });
   });
 
