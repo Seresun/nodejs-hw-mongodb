@@ -1,34 +1,38 @@
 import express from 'express';
-import cors from 'cors';
 import pino from 'pino-http';
-import contactsRouter from './routes/contacts.js';
+import cors from 'cors';
+import { getEnv } from './utils/getEnv.js';
+import { ENV_VARS } from './constants/env.js';
+import contactsRouter from './routers/contacts.js';
+import { errorHandler } from './middlewares/errorHandler.js';
+import { notFoundHandler } from './middlewares/notFoundHandler.js';
 
-const setupServer = () => {
+export const setupServer = () => {
   const app = express();
-
-  const PORT = process.env.PORT || 3000;
+  app.use(cors());
+  app.use(express.json());
 
   app.use(
     pino({
       transport: {
         target: 'pino-pretty',
       },
-    })
+    }),
   );
 
-  app.use(cors());
+  app.use(contactsRouter);
+  app.use('*', notFoundHandler);
+  app.use(errorHandler);
 
-  // Маршрут для корневого URL
-  app.get('/', (req, res) => {
-    res.send('Welcome to the API! Use /contacts for contact-related endpoints.');
+  app.get('/', async (req, res) => {
+    res.status(200).json({
+      status: 200,
+      message: 'Hi, it`s working!!!😁',
+    });
   });
 
-  // Основной роутер для /contacts
-  app.use('/contacts', contactsRouter);
-
+  const PORT = getEnv(ENV_VARS.PORT, 3000);
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
 };
-
-export default setupServer;
