@@ -17,12 +17,8 @@ export const setupServer = () => {
       transport: {
         target: 'pino-pretty',
       },
-    }),
+    })
   );
-
-  app.use("/contacts", contactsRouter);
-  app.use('*', notFoundHandler);
-  app.use(errorHandler);
 
   app.get('/', async (req, res) => {
     res.status(200).json({
@@ -30,6 +26,10 @@ export const setupServer = () => {
       message: 'it`s working!',
     });
   });
+
+  app.use('/contacts', contactsRouter);
+  app.use('*', notFoundHandler);
+  app.use(errorHandler);
 
   const PORT = getEnv(ENV_VARS.PORT, 3000);
   app.listen(PORT, () => {
