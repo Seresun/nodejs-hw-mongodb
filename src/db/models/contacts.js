@@ -1,19 +1,24 @@
-import { model, Schema } from 'mongoose';
+import Joi from 'joi';
+import mongoose from 'mongoose';
+import mongoosePaginate from 'mongoose-paginate-v2';
 
-const contactSchema = new Schema(
+const contactSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
-    phoneNumber: { type: String, required: true },
-    email: { type: String },
-    isFavourite: { type: Boolean, default: false },
-    contactType: {
-      type: String,
-      enum: ['work', 'home', 'personal'],
-      required: true,
-      default: 'personal',
-    },
+    name: { type: String, required: true, minlength: 3, maxlength: 20 },
+    email: { type: String, required: true },
+    phone: { type: String, required: true },
+    favorite: { type: Boolean, default: false },
   },
-  { timestamps: true, versionKey: false },
+  { versionKey: false }
 );
 
-export const ContactCollection = model('contacts', contactSchema);
+contactSchema.plugin(mongoosePaginate);
+
+export const ContactCollection = mongoose.model('Contact', contactSchema);
+
+export const contactJoiSchema = Joi.object({
+  name: Joi.string().min(3).max(20).required(),
+  email: Joi.string().email().required(),
+  phone: Joi.string().min(7).max(15).required(),
+  favorite: Joi.boolean(),
+});
