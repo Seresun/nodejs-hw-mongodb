@@ -1,25 +1,31 @@
-import createHttpError from 'http-errors';
 import {
-  getContacts,
-  getContactById,
   createContact,
-  updateContact,
+  getContactById,
+  getContacts,
   deleteContact,
+  updateContact,
 } from '../db/services/contacts.js';
-import { contactJoiSchema } from '../middlewares/contactValidation.js';
+import createHttpError from 'http-errors';
 
 export const getContactsController = async (req, res, next) => {
   try {
-    const {
-      page = 1,
-      perPage = 10,
-      sortBy = 'name',
-      sortOrder = 'asc',
-    } = req.query;
-    const contacts = await getContacts(page, perPage, sortBy, sortOrder);
+    const { page = 1, perPage = 10, sortBy = "name", sortOrder = "asc" } = req.query;
+
+    const pageNumber = parseInt(page, 10);
+    const perPageNumber = parseInt(perPage, 10);
+    const skip = (pageNumber - 1) * perPageNumber;
+    const order = sortOrder === "desc" ? -1 : 1;
+
+    const contacts = await getContacts({ skip, perPage: perPageNumber, sortBy, order });
+    const totalContacts = await getContacts({ count: true });
+
     res.json({
       status: 200,
       message: 'Successfully found contacts!',
+      totalContacts,
+      totalPages: Math.ceil(totalContacts / perPageNumber),
+      currentPage: pageNumber,
+      perPage: perPageNumber,
       data: contacts,
     });
   } catch (error) {
@@ -29,9 +35,18 @@ export const getContactsController = async (req, res, next) => {
 
 export const getContactByIdController = async (req, res, next) => {
   try {
-    const contact = await getContactById(req.params.id);
-    if (!contact) return next(createHttpError(404, 'Contact not found'));
-    res.json({ status: 200, data: contact });
+    const { contactId } = req.params;
+    const contact = await getContactById(contactId);
+
+    if (!contact) {
+      throw createHttpError(404, 'Contact not found');
+    }
+
+    res.json({
+      status: 200,
+      message: `Successfully found contact with id ${contactId}!`,
+      data: contact,
+    });
   } catch (error) {
     next(error);
   }
@@ -39,30 +54,11 @@ export const getContactByIdController = async (req, res, next) => {
 
 export const createContactController = async (req, res, next) => {
   try {
-    const { error } = contactJoiSchema.validate(req.body);
-    if (error) return next(createHttpError(400, error.message));
     const contact = await createContact(req.body);
-    res
-      .status(201)
-      .json({
-        status: 201,
-        message: 'Successfully created contact!',
-        data: contact,
-      });
-  } catch (error) {
-    next(error);
-  }
-};
 
-export const updateContactController = async (req, res, next) => {
-  try {
-    const { error } = contactJoiSchema.validate(req.body);
-    if (error) return next(createHttpError(400, error.message));
-    const contact = await updateContact(req.params.id, req.body);
-    if (!contact) return next(createHttpError(404, 'Contact not found'));
-    res.json({
-      status: 200,
-      message: 'Successfully updated contact!',
+    res.status(201).json({
+      status: 201,
+      message: `Successfully created a contact!`,
       data: contact,
     });
   } catch (error) {
@@ -72,9 +68,33 @@ export const updateContactController = async (req, res, next) => {
 
 export const deleteContactController = async (req, res, next) => {
   try {
-    const contact = await deleteContact(req.params.id);
-    if (!contact) return next(createHttpError(404, 'Contact not found'));
+    const { contactId } = req.params;
+    const contact = await deleteContact(contactId);
+
+    if (!contact) {
+      throw createHttpError(404, 'Contact not found');
+    }
+
     res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const patchContactController = async (req, res, next) => {
+  try {
+    const { contactId } = req.params;
+    const result = await updateContact(contactId, req.body);
+
+    if (!result) {
+      throw createHttpError(404, 'Contact not found');
+    }
+
+    res.json({
+      status: 200,
+      message: `Successfully patched a contact!`,
+      data: result.contact,
+    });
   } catch (error) {
     next(error);
   }
