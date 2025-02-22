@@ -1,21 +1,23 @@
-import mongoose from 'mongoose';
-import mongoosePaginate from 'mongoose-paginate-v2';
+import { Schema, model } from 'mongoose';
 
-const contactSchema = new mongoose.Schema(
+const contactSchema = new Schema(
   {
     name: { type: String, required: true, minlength: 3, maxlength: 20 },
-    email: { type: String, required: true },
-    phone: { type: String, required: true, minlength: 7, maxlength: 15 },
-    contactType: {
+    phoneNumber: {
       type: String,
       required: true,
-      enum: ['work', 'home', 'personal'],
+      match: /^\+\d{12}$/, // Формат +380000000000
     },
-    favorite: { type: Boolean, default: false },
+    email: { type: String, match: /^\S+@\S+\.\S+$/ }, // Простая валидация email
+    isFavourite: { type: Boolean, required: true, default: false },
+    contactType: {
+      type: String,
+      enum: ['work', 'home', 'personal'],
+      required: true,
+    },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: false },
   },
-  { versionKey: false }
+  { timestamps: true } // Добавит createdAt и updatedAt
 );
 
-contactSchema.plugin(mongoosePaginate);
-
-export const ContactCollection = mongoose.model('Contact', contactSchema);
+export const Contact = model('Contact', contactSchema);
