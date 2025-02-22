@@ -1,5 +1,5 @@
-import { ContactCollection } from "../models/contacts.js";
-import { calculatePaginationData } from "../../utils/calculatePaginationData.js";
+import { ContactCollection } from '../db/models/contacts.js';  
+import { calculatePaginationData } from "../utils/calculatePaginationData.js";
 
 export const getContacts = async ({ page, perPage }) => {
   const limit = perPage;

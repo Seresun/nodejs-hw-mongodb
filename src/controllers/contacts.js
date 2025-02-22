@@ -4,7 +4,7 @@ import {
   getContacts,
   deleteContact,
   updateContact,
-} from "../db/services/contacts.js";
+} from "../services/contacts.js";
 
 import createHttpError from "http-errors";
 import { parsePaginationParams } from "../utils/parsePaginationParams.js";
