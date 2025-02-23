@@ -20,4 +20,5 @@ const contactSchema = new Schema(
   { timestamps: true } // Добавит createdAt и updatedAt
 );
 
-export const Contact = model('Contact', contactSchema);
+const ContactCollection = model('Contact', contactSchema);
+export default ContactCollection;

@@ -1,14 +1,21 @@
-import { ContactCollection } from '../db/models/contacts.js';  
-import { calculatePaginationData } from "../utils/calculatePaginationData.js";
+import ContactCollection from '../db/models/contacts.js';
+import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 
-export const getContacts = async ({ page, perPage }) => {
+export const getContacts = async ({
+  page,
+  perPage,
+  sortBy = 'name',
+  sortOrder = 'asc',
+}) => {
   const limit = perPage;
   const skip = (page - 1) * perPage;
+  const order = sortOrder === 'desc' ? -1 : 1;
 
-  const contactsQuery = ContactCollection.find();
-  const contactsCount = await ContactCollection.find()
-    .merge(contactsQuery)
-    .countDocuments();
+  const validSortFields = ['name', 'email', 'phone', 'contactType'];
+  const sortField = validSortFields.includes(sortBy) ? sortBy : 'name';
+
+  const contactsQuery = ContactCollection.find().sort({ [sortField]: order });
+  const contactsCount = await ContactCollection.countDocuments();
 
   const contacts = await contactsQuery.skip(skip).limit(limit).exec();
 
@@ -33,20 +40,14 @@ export const deleteContact = async (contactId) => {
 };
 
 export const updateContact = async (contactId, payload, options = {}) => {
-  const rawResult = await ContactCollection.findOneAndUpdate(
-    { _id: contactId },
+  const updatedContact = await ContactCollection.findByIdAndUpdate(
+    contactId,
     payload,
     {
       new: true,
-      includeResultMetadata: true,
       ...options,
     }
   );
 
-  if (!rawResult || !rawResult.value) return null;
-
-  return {
-    contact: rawResult.value,
-    isNew: Boolean(rawResult?.lastErrorObject?.upserted),
-  };
+  return updatedContact;
 };
