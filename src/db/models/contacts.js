@@ -6,9 +6,9 @@ const contactSchema = new Schema(
     phoneNumber: {
       type: String,
       required: true,
-      match: /^\+\d{12}$/, // Формат +380000000000
+      match: [/^\+\d{12}$/, 'Phone number must be in the format +380000000000'],
     },
-    email: { type: String, match: /^\S+@\S+\.\S+$/ }, // Простая валидация email
+    email: { type: String, match: [/^\S+@\S+\.\S+$/, 'Invalid email format'] },
     isFavourite: { type: Boolean, required: true, default: false },
     contactType: {
       type: String,
@@ -17,7 +17,7 @@ const contactSchema = new Schema(
     },
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: false },
   },
-  { timestamps: true } // Добавит createdAt и updatedAt
+  { timestamps: true }
 );
 
 const ContactCollection = model('Contact', contactSchema);

@@ -1,20 +1,18 @@
 import ContactCollection from '../db/models/contacts.js';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
+import { parseSortParams } from '../utils/parseSortParams.js';
 
-export const getContacts = async ({
-  page,
-  perPage,
-  sortBy = 'name',
-  sortOrder = 'asc',
-}) => {
+export const getContacts = async ({ page, perPage, sortBy, sortOrder }) => {
   const limit = perPage;
   const skip = (page - 1) * perPage;
-  const order = sortOrder === 'desc' ? -1 : 1;
 
-  const validSortFields = ['name', 'email', 'phone', 'contactType'];
-  const sortField = validSortFields.includes(sortBy) ? sortBy : 'name';
+  const { sortBy: validSortBy, sortOrder: validSortOrder } = parseSortParams({
+    sortBy,
+    sortOrder,
+  });
+  const order = validSortOrder === 'desc' ? -1 : 1;
 
-  const contactsQuery = ContactCollection.find().sort({ [sortField]: order });
+  const contactsQuery = ContactCollection.find().sort({ [validSortBy]: order });
   const contactsCount = await ContactCollection.countDocuments();
 
   const contacts = await contactsQuery.skip(skip).limit(limit).exec();
