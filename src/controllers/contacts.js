@@ -6,7 +6,6 @@ import {
   deleteContact,
   updateContact,
 } from '../services/contacts.js';
-
 import createHttpError from 'http-errors';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
@@ -15,12 +14,17 @@ import {
   contactUpdateSchema,
 } from '../validation/contactValidation.js';
 
+/**
+ * Получение контактов текущего пользователя
+ */
 export const getContactsController = async (req, res, next) => {
   try {
     const { page, perPage } = parsePaginationParams(req.query);
     const { sortBy, sortOrder } = parseSortParams(req.query);
 
+    // Показываем только контакты текущего пользователя
     const contactsData = await getContacts({
+      userId: req.user.id,
       page,
       perPage,
       sortBy,
@@ -37,6 +41,9 @@ export const getContactsController = async (req, res, next) => {
   }
 };
 
+/**
+ * Получение одного контакта по ID
+ */
 export const getContactByIdController = async (req, res, next) => {
   try {
     const { contactId } = req.params;
@@ -45,7 +52,8 @@ export const getContactByIdController = async (req, res, next) => {
       throw createHttpError(400, 'Invalid contact ID');
     }
 
-    const contact = await getContactById(contactId);
+    // Ищем контакт только среди контактов текущего пользователя
+    const contact = await getContactById(contactId, req.user.id);
 
     if (!contact) {
       throw createHttpError(404, 'Contact not found');
@@ -61,9 +69,11 @@ export const getContactByIdController = async (req, res, next) => {
   }
 };
 
+/**
+ * Создание нового контакта
+ */
 export const createContactController = async (req, res, next) => {
   try {
-    // Валидация входных данных
     const { error, value } = contactCreateSchema.validate(req.body, {
       abortEarly: false,
     });
@@ -75,7 +85,8 @@ export const createContactController = async (req, res, next) => {
       );
     }
 
-    const contact = await createContact(value);
+    // Добавляем userId перед созданием контакта
+    const contact = await createContact({ ...value, userId: req.user.id });
 
     res.status(201).json({
       status: 201,
@@ -87,16 +98,19 @@ export const createContactController = async (req, res, next) => {
   }
 };
 
+/**
+ * Удаление контакта
+ */
 export const deleteContactController = async (req, res, next) => {
   try {
     const { contactId } = req.params;
 
-    // Проверяем валидность ObjectId
     if (!mongoose.Types.ObjectId.isValid(contactId)) {
       throw createHttpError(400, 'Invalid contact ID');
     }
 
-    const contact = await deleteContact(contactId);
+    // Удаляем контакт только у текущего пользователя
+    const contact = await deleteContact(contactId, req.user.id);
 
     if (!contact) {
       throw createHttpError(404, 'Contact not found');
@@ -108,16 +122,17 @@ export const deleteContactController = async (req, res, next) => {
   }
 };
 
+/**
+ * Обновление контакта
+ */
 export const patchContactController = async (req, res, next) => {
   try {
     const { contactId } = req.params;
 
-    // Проверяем валидность ObjectId
     if (!mongoose.Types.ObjectId.isValid(contactId)) {
       throw createHttpError(400, 'Invalid contact ID');
     }
 
-    // Валидация обновляемых данных
     const { error, value } = contactUpdateSchema.validate(req.body, {
       abortEarly: false,
     });
@@ -129,7 +144,8 @@ export const patchContactController = async (req, res, next) => {
       );
     }
 
-    const result = await updateContact(contactId, value);
+    // Обновляем только контакт, принадлежащий пользователю
+    const result = await updateContact(contactId, value, req.user.id);
 
     if (!result) {
       throw createHttpError(404, 'Contact not found');

@@ -15,7 +15,7 @@ const contactSchema = new Schema(
       enum: ['work', 'home', 'personal'],
       required: true,
     },
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: false },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }, // Сделали обязательным
   },
   { timestamps: true }
 );
