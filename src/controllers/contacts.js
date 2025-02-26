@@ -22,9 +22,8 @@ export const getContactsController = async (req, res, next) => {
     const { page, perPage } = parsePaginationParams(req.query);
     const { sortBy, sortOrder } = parseSortParams(req.query);
 
-    // Показываем только контакты текущего пользователя
     const contactsData = await getContacts({
-      userId: req.user.id,
+      userId: req.user.id, // Добавляем userId
       page,
       perPage,
       sortBy,
@@ -52,7 +51,6 @@ export const getContactByIdController = async (req, res, next) => {
       throw createHttpError(400, 'Invalid contact ID');
     }
 
-    // Ищем контакт только среди контактов текущего пользователя
     const contact = await getContactById(contactId, req.user.id);
 
     if (!contact) {
@@ -85,7 +83,6 @@ export const createContactController = async (req, res, next) => {
       );
     }
 
-    // Добавляем userId перед созданием контакта
     const contact = await createContact({ ...value, userId: req.user.id });
 
     res.status(201).json({
@@ -109,7 +106,6 @@ export const deleteContactController = async (req, res, next) => {
       throw createHttpError(400, 'Invalid contact ID');
     }
 
-    // Удаляем контакт только у текущего пользователя
     const contact = await deleteContact(contactId, req.user.id);
 
     if (!contact) {
@@ -144,7 +140,6 @@ export const patchContactController = async (req, res, next) => {
       );
     }
 
-    // Обновляем только контакт, принадлежащий пользователю
     const result = await updateContact(contactId, value, req.user.id);
 
     if (!result) {
