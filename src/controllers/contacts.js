@@ -68,7 +68,7 @@ export const getContactByIdController = async (req, res, next) => {
 };
 
 /**
- * Создание нового контакта
+ * Создание нового контакта (с возможностью загрузки фото)
  */
 export const createContactController = async (req, res, next) => {
   try {
@@ -83,7 +83,16 @@ export const createContactController = async (req, res, next) => {
       );
     }
 
-    const contact = await createContact({ ...value, userId: req.user.id });
+    let photoUrl = null;
+    if (req.file) {
+      photoUrl = req.file.path;
+    }
+
+    const contact = await createContact({
+      ...value,
+      userId: req.user.id,
+      photo: photoUrl,
+    });
 
     res.status(201).json({
       status: 201,
