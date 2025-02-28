@@ -25,6 +25,3 @@ export const SMTP = {
   SMTP_FROM: 'dykyy.s@gmail.com',
 };
 
-export const JWT = {
-  JWT_SECRET: 'ozr7NksPpCHX4logKteKUp3moM4',
-};
