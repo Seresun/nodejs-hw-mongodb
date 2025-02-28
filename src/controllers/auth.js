@@ -1,15 +1,11 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import createHttpError from 'http-errors';
-import { UsersCollection } from '../db/models/User.js';
-
 import {
   registerUser,
   loginUser,
   refreshUsersSession,
   logoutUser,
+  requestResetToken,
+  resetPassword as resetPasswordService,
 } from '../services/auth.js';
-import { sendResetEmail } from '../services/emailService.js';
 
 /**
  * Регистрация пользователя
@@ -114,25 +110,10 @@ const logoutUserController = async (req, res, next) => {
  */
 const sendResetPasswordEmail = async (req, res, next) => {
   try {
-    const { email } = req.body;
-
-    // Проверяем, существует ли пользователь
-    const user = await UsersCollection.findOne({ email }); // ✅ Используем UsersCollection
-    if (!user) {
-      throw createHttpError(404, 'User not found!');
-    }
-
-    // Генерируем JWT токен на 5 минут
-    const token = jwt.sign({ email }, process.env.JWT_SECRET, {
-      expiresIn: '5m',
-    });
-
-    // Отправляем email с токеном
-    await sendResetEmail(email, token);
-
-    res.status(200).json({
+    await requestResetToken(req.body.email);
+    res.json({
       status: 200,
-      message: 'Reset password email has been successfully sent.',
+      message: 'Reset password email sent successfully!',
       data: {},
     });
   } catch (error) {
@@ -143,33 +124,12 @@ const sendResetPasswordEmail = async (req, res, next) => {
 /**
  * Сброс пароля пользователя
  */
-const resetPassword = async (req, res, next) => {
+const resetPasswordController = async (req, res, next) => {
   try {
-    const { token, password } = req.body;
-
-    // Проверяем токен
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch {
-      throw createHttpError(401, 'Token is expired or invalid.');
-    }
-
-    const { email } = decoded;
-
-    // Проверяем, существует ли пользователь
-    const user = await UsersCollection.findOne({ email }); // ✅ Используем UsersCollection
-    if (!user) {
-      throw createHttpError(404, 'User not found!');
-    }
-
-    // Хешируем новый пароль
-    user.password = await bcrypt.hash(password, 10);
-    await user.save();
-
-    res.status(200).json({
+    await resetPasswordService(req.body);
+    res.json({
       status: 200,
-      message: 'Password has been successfully reset.',
+      message: 'Password reset successfully!',
       data: {},
     });
   } catch (error) {
@@ -178,7 +138,7 @@ const resetPassword = async (req, res, next) => {
 };
 
 /**
- * ✅ Экспорт всех функций (без дублирования!)
+ * ✅ Экспорт всех функций (без дублирования)
  */
 export {
   registerUserController,
@@ -186,5 +146,5 @@ export {
   refreshUserSessionController,
   logoutUserController,
   sendResetPasswordEmail,
-  resetPassword,
+  resetPasswordController,
 };

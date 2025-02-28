@@ -16,12 +16,16 @@ export const CLOUDINARY = {
   API_KEY: '847883415548178',
   API_SECRET: 'c2T3wnV7AeCmvAwT9fZNWvLKZbI',
 };
-
+export const JWT = {
+  JWT_SECRET: process.env.JWT_SECRET || 'your-secret-key',
+  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '1h',
+};
 export const SMTP = {
   SMTP_HOST: 'smtp-relay.brevo.com',
   SMTP_PORT: '587',
   SMTP_USER: '848d2d001@smtp-brevo.com',
-  SMTP_PASSWORD: 'your-secret-key',
+  SMTP_PASSWORD: 'xsmtpsib-49a134dab1329a660e0fe25113dfca66bd9aa38dd4b791f61df03f6014489468-JMV1j2aXWfKBG63w',
   SMTP_FROM: 'dykyy.s@gmail.com',
 };
 
+export const TEMPLATES_DIR = 'src/templates/';
