@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import createHttpError from 'http-errors';
 import {
   createContact,
   getContactById,
@@ -6,13 +7,14 @@ import {
   deleteContact,
   updateContact,
 } from '../services/contacts.js';
-import createHttpError from 'http-errors';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import {
   contactCreateSchema,
   contactUpdateSchema,
 } from '../validation/contactValidation.js';
+import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
+import { getEnvVar } from '../utils/getEnv.js';
 
 /**
  * Получение контактов текущего пользователя
@@ -23,7 +25,7 @@ export const getContactsController = async (req, res, next) => {
     const { sortBy, sortOrder } = parseSortParams(req.query);
 
     const contactsData = await getContacts({
-      userId: req.user.id, // Добавляем userId
+      userId: req.user.id,
       page,
       perPage,
       sortBy,
@@ -85,7 +87,11 @@ export const createContactController = async (req, res, next) => {
 
     let photoUrl = null;
     if (req.file) {
-      photoUrl = req.file.path;
+      if (getEnvVar('ENABLE_CLOUDINARY') === 'true') {
+        photoUrl = await saveFileToCloudinary(req.file);
+      } else {
+        photoUrl = req.file.path;
+      }
     }
 
     const contact = await createContact({
@@ -128,7 +134,7 @@ export const deleteContactController = async (req, res, next) => {
 };
 
 /**
- * Обновление контакта
+ * Обновление контакта (с возможностью загрузки нового фото)
  */
 export const patchContactController = async (req, res, next) => {
   try {
@@ -149,7 +155,21 @@ export const patchContactController = async (req, res, next) => {
       );
     }
 
-    const result = await updateContact(contactId, value, req.user.id);
+    let photoUrl;
+    if (req.file) {
+      if (getEnvVar('ENABLE_CLOUDINARY') === 'true') {
+        photoUrl = await saveFileToCloudinary(req.file);
+      } else {
+        photoUrl = req.file.path;
+      }
+    }
+
+    const updatedData = {
+      ...value,
+      ...(photoUrl && { photo: photoUrl }),
+    };
+
+    const result = await updateContact(contactId, updatedData, req.user.id);
 
     if (!result) {
       throw createHttpError(404, 'Contact not found');
