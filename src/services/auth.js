@@ -9,8 +9,7 @@ import { UsersCollection } from '../db/models/User.js';
 import { SessionsCollection } from '../db/models/Session.js';
 import { sendEmail } from '../utils/sendMail.js';
 import { JWT, SMTP, TEMPLATES_DIR } from '../constants/index.js';
-
-import { getEnvVar } from '../utils/getEnv.js';
+import { ENV_VARS } from '../constants/env.js';
 
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
 const ONE_DAY = 24 * 60 * 60 * 1000;
@@ -130,11 +129,9 @@ export const requestResetToken = async (email) => {
     throw createHttpError(404, 'User not found');
   }
 
-  const resetToken = jwt.sign(
-    { sub: user._id, email },
-    getEnvVar(JWT.JWT_SECRET),
-    { expiresIn: '15m' }
-  );
+  const resetToken = jwt.sign({ sub: user._id, email }, JWT.JWT_SECRET, {
+    expiresIn: JWT.JWT_EXPIRES_IN,
+  });
 
   // Читаем шаблон email
   const resetPasswordTemplatePath = path.join(
@@ -147,7 +144,7 @@ export const requestResetToken = async (email) => {
   // Генерируем HTML с персонализированными данными
   const html = template({
     name: user.name,
-    link: `${getEnvVar('APP_DOMAIN')}/reset-password?token=${resetToken}`,
+    link: `${ENV_VARS.APP_DOMAIN}/reset-password?token=${resetToken}`,
   });
 
   // Отправляем email
@@ -168,7 +165,7 @@ export const requestResetToken = async (email) => {
 export const resetPassword = async (payload) => {
   let decoded;
   try {
-    decoded = jwt.verify(payload.token, getEnvVar(JWT.JWT_SECRET));
+    decoded = jwt.verify(payload.token, ENV_VARS.JWT_SECRET);
   } catch (error) {
     console.error('JWT verification failed:', error);
     throw createHttpError(401, 'Invalid or expired token');
@@ -191,6 +188,6 @@ export const resetPassword = async (payload) => {
 };
 
 /**
- * ✅ Экспорт всех функций (ОДИН раз)
+ * ✅ Экспорт всех функций
  */
 export { registerUser, loginUser, refreshUsersSession, logoutUser };

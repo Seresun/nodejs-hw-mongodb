@@ -3,7 +3,7 @@ import { getEnv } from '../utils/getEnv.js';
 
 import { ENV_VARS } from '../constants/env.js';
 
-export const initMongoConnection = async () => {
+export const initMongoDB = async () => {
   try {
     const user = getEnv(ENV_VARS.MONGODB_USER);
     const password = getEnv(ENV_VARS.MONGODB_PASSWORD);

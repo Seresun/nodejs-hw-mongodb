@@ -1,3 +1,5 @@
+import path from 'path';
+
 export const SORT_ORDER = {
   ASC: 'asc',
   DESC: 'desc',
@@ -11,21 +13,26 @@ export const SORT_FIELDS = [
   'createdAt',
   'updatedAt',
 ];
+
 export const CLOUDINARY = {
   CLOUD_NAME: 'doiz2mso3',
   API_KEY: '847883415548178',
   API_SECRET: 'c2T3wnV7AeCmvAwT9fZNWvLKZbI',
 };
+
 export const JWT = {
-  JWT_SECRET: process.env.JWT_SECRET || 'your-secret-key',
+  JWT_SECRET: process.env.JWT_SECRET || 'default-secret-key',
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '1h',
 };
+
 export const SMTP = {
-  SMTP_HOST: 'smtp-relay.brevo.com',
-  SMTP_PORT: '587',
-  SMTP_USER: '848d2d001@smtp-brevo.com',
-  SMTP_PASSWORD: 'xsmtpsib-49a134dab1329a660e0fe25113dfca66bd9aa38dd4b791f61df03f6014489468-JMV1j2aXWfKBG63w',
-  SMTP_FROM: 'dykyy.s@gmail.com',
+  SMTP_HOST: 'SMTP_HOST',
+  SMTP_PORT: 'SMTP_PORT',
+  SMTP_USER: 'SMTP_USER',
+  SMTP_PASSWORD: 'SMTP_PASSWORD',
+  SMTP_FROM: 'SMTP_FROM',
 };
 
-export const TEMPLATES_DIR = 'src/templates/';
+export const TEMPLATES_DIR = path.join(process.cwd(), 'src', 'templates');
+export const UPLOAD_DIR = path.join(process.cwd(), 'src', 'uploads');
+export const TEMP_UPLOAD_DIR = path.join(process.cwd(), 'src', 'temp');

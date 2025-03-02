@@ -11,10 +11,10 @@ import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import {
   contactCreateSchema,
-  contactUpdateSchema,
 } from '../validation/contactValidation.js';
 import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
 import { getEnvVar } from '../utils/getEnv.js';
+import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
 
 /**
  * Получение контактов текущего пользователя
@@ -90,7 +90,7 @@ export const createContactController = async (req, res, next) => {
       if (getEnvVar('ENABLE_CLOUDINARY') === 'true') {
         photoUrl = await saveFileToCloudinary(req.file);
       } else {
-        photoUrl = req.file.path;
+        photoUrl = await saveFileToUploadDir(req.file);
       }
     }
 
@@ -139,40 +139,28 @@ export const deleteContactController = async (req, res, next) => {
 export const patchContactController = async (req, res, next) => {
   try {
     const { contactId } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(contactId)) {
-      throw createHttpError(400, 'Invalid contact ID');
-    }
-
-    const { error, value } = contactUpdateSchema.validate(req.body, {
-      abortEarly: false,
-    });
-
-    if (error) {
-      throw createHttpError(
-        400,
-        error.details.map((err) => err.message).join(', ')
-      );
-    }
+    const photo = req.file;
 
     let photoUrl;
-    if (req.file) {
+
+    if (photo) {
       if (getEnvVar('ENABLE_CLOUDINARY') === 'true') {
-        photoUrl = await saveFileToCloudinary(req.file);
+        photoUrl = await saveFileToCloudinary(photo);
       } else {
-        photoUrl = req.file.path;
+        photoUrl = await saveFileToUploadDir(photo);
       }
     }
 
     const updatedData = {
-      ...value,
-      ...(photoUrl && { photo: photoUrl }),
+      ...req.body,
+      photo: photoUrl,
     };
 
-    const result = await updateContact(contactId, updatedData, req.user.id);
+    const result = await updateContact(contactId, updatedData);
 
     if (!result) {
-      throw createHttpError(404, 'Contact not found');
+      next(createHttpError(404, 'Contact not found'));
+      return;
     }
 
     res.json({

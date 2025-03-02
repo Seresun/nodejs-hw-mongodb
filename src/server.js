@@ -9,7 +9,7 @@ import authRouter from './routers/auth.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 
-export const setupServer = () => {
+export const startServer = () => {
   const app = express();
   app.use(cors());
   app.use(express.json());
