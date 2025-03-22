@@ -4,9 +4,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js"
-  },
+  "test": "echo \"Error: no test specified\" && exit 1",
+  "dev": "nodemon src/index.js",
+  "start": "node src/index.js"
+},
   "keywords": [],
   "author": "Slava_Skrypnyk <slavnyunstoppable22@gmail.com>",
   "license": "ISC",
