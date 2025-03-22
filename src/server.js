@@ -1,42 +1,40 @@
+// src/server.js
+
 import express from 'express';
 import pino from 'pino-http';
 import cors from 'cors';
-import cookieParser from 'cookie-parser';
-import { getEnv } from './utils/getEnv.js';
-import { ENV_VARS } from './constants/env.js';
-import contactsRouter from './routers/contacts.js';
-import authRouter from './routers/auth.js';
+import router from './routers/index.js';
+
+import { getEnvVar } from './utils/getEnvVar.js';
+
+// Імпортуємо middleware
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
+import cookieParser from 'cookie-parser';
+import { UPLOAD_DIR } from './constants/index.js';
 
-export const startServer = () => {
+const PORT = Number(getEnvVar('PORT', '3000'));
+
+export const setupServer = () => {
   const app = express();
-  app.use(cors());
-  app.use(express.json());
-  app.use(cookieParser());
 
+  app.use(express.json());
+  app.use(cors());
+  app.use(cookieParser());
   app.use(
     pino({
       transport: {
         target: 'pino-pretty',
       },
-    })
+    }),
   );
 
-  app.get('/', async (req, res) => {
-    res.status(200).json({
-      status: 200,
-      message: 'it`s working!',
-    });
-  });
+  app.use(router);
 
-  app.use('/auth', authRouter);
-  app.use('/contacts', contactsRouter);
-
-  app.use('*', notFoundHandler);
   app.use(errorHandler);
+  app.use('/uploads', express.static(UPLOAD_DIR));
+  app.use('*', notFoundHandler);
 
-  const PORT = getEnv(ENV_VARS.PORT, 3000);
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });

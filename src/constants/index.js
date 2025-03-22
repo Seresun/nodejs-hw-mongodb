@@ -1,29 +1,17 @@
-import path from 'path';
+import path from 'node:path';
 
 export const SORT_ORDER = {
   ASC: 'asc',
   DESC: 'desc',
 };
 
-export const SORT_FIELDS = [
-  '_id',
-  'name',
-  'email',
-  'phone',
-  'createdAt',
-  'updatedAt',
-];
+export const FIFTEEN_MINUTES = 15 * 60 * 1000;
+export const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
 
-export const CLOUDINARY = {
-  CLOUD_NAME: 'doiz2mso3',
-  API_KEY: '847883415548178',
-  API_SECRET: 'c2T3wnV7AeCmvAwT9fZNWvLKZbI',
-};
+export const TEMPLATES_DIR = path.join(process.cwd(), 'src', 'templates');
 
-export const JWT = {
-  JWT_SECRET: process.env.JWT_SECRET || 'default-secret-key',
-  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '1h',
-};
+export const TEMP_UPLOAD_DIR = path.join(process.cwd(), 'temp');
+export const UPLOAD_DIR = path.join(process.cwd(), 'uploads');
 
 export const SMTP = {
   SMTP_HOST: 'SMTP_HOST',
@@ -33,6 +21,8 @@ export const SMTP = {
   SMTP_FROM: 'SMTP_FROM',
 };
 
-export const TEMPLATES_DIR = path.join(process.cwd(), 'src', 'templates');
-export const UPLOAD_DIR = path.join(process.cwd(), 'src', 'uploads');
-export const TEMP_UPLOAD_DIR = path.join(process.cwd(), 'src', 'temp');
+export const CLOUDINARY = {
+  CLOUD_NAME: 'CLOUD_NAME',
+  API_KEY: 'API_KEY',
+  API_SECRET: 'API_SECRET',
+};

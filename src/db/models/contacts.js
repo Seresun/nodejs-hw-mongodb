@@ -1,24 +1,42 @@
-import { Schema, model } from 'mongoose';
+// src/db/models/contacts.js
 
-const contactSchema = new Schema(
+import { model, Schema } from 'mongoose';
+
+const contactsSchema = new Schema(
   {
-    name: { type: String, required: true, minlength: 3, maxlength: 20 },
+    name: {
+      type: String,
+      required: true,
+    },
     phoneNumber: {
       type: String,
       required: true,
-      match: [/^\+\d{12}$/, 'Phone number must be in the format +380000000000'],
     },
-    email: { type: String, match: [/^\S+@\S+\.\S+$/, 'Invalid email format'] },
-    isFavourite: { type: Boolean, required: true, default: false },
-    contactType: {
+    email: {
       type: String,
-      enum: ['work', 'home', 'personal'],
       required: true,
     },
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }, // Сделали обязательным
+    isFavourite: {
+      type: Boolean,
+      default: false,
+    },
+    contactType: {
+      type: String,
+      required: true,
+      enum: ['work', 'home', 'personal'],
+      default: 'personal',
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'users',
+      required: true,
+    },
+    photo: { type: String },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    versionKey: false,
+  },
 );
 
-const ContactCollection = model('Contact', contactSchema);
-export default ContactCollection;
+export const ContactsCollection = model('contacts', contactsSchema);

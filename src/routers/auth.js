@@ -1,55 +1,51 @@
+// src/routers/auth.js
+
 import { Router } from 'express';
+import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 import {
-  registerUserController,
-  loginUserController,
-  refreshUserSessionController,
-  logoutUserController,
-  sendResetPasswordEmail,
-  resetPasswordController,
-} from '../controllers/auth.js';
-import { validateBody } from '../middlewares/validate.js';
-import {
-  registerUserSchema,
   loginUserSchema,
-  emailSchema,
+  registerUserSchema,
+  requestResetEmailSchema,
   resetPasswordSchema,
 } from '../validation/auth.js';
-import { ctrlWrapper } from '../utils/ctrlWrapper.js';
+import {
+  loginUserController,
+  logoutUserController,
+  refreshUserSessionController,
+  registerUserController,
+  requestResetEmailController,
+  resetPasswordController,
+} from '../controllers/auth.js';
+import { validateBody } from '../middlewares/validateBody.js';
 
 const router = Router();
 
-// Регистрация пользователя
 router.post(
   '/register',
   validateBody(registerUserSchema),
-  ctrlWrapper(registerUserController)
+  ctrlWrapper(registerUserController),
 );
 
-// Вход пользователя
 router.post(
   '/login',
   validateBody(loginUserSchema),
-  ctrlWrapper(loginUserController)
+  ctrlWrapper(loginUserController),
 );
 
-// Обновление access-токена
-router.post('/refresh', ctrlWrapper(refreshUserSessionController));
-
-// Выход пользователя
 router.post('/logout', ctrlWrapper(logoutUserController));
 
-// Отправка email для сброса пароля
+router.post('/refresh', ctrlWrapper(refreshUserSessionController));
+
 router.post(
   '/send-reset-email',
-  validateBody(emailSchema),
-  ctrlWrapper(sendResetPasswordEmail)
+  validateBody(requestResetEmailSchema),
+  ctrlWrapper(requestResetEmailController),
 );
 
-// Сброс пароля
 router.post(
-  '/reset-password',
+  '/reset-pwd',
   validateBody(resetPasswordSchema),
-  ctrlWrapper(resetPasswordController)
+  ctrlWrapper(resetPasswordController),
 );
 
 export default router;

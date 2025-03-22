@@ -1,20 +1,22 @@
+// src/db/initMongoDB.js
+
 import mongoose from 'mongoose';
-import { getEnv } from '../utils/getEnv.js';
 
-import { ENV_VARS } from '../constants/env.js';
+import { getEnvVar } from '../utils/getEnvVar.js';
 
-export const initMongoDB = async () => {
+export const initMongoConnection = async () => {
   try {
-    const user = getEnv(ENV_VARS.MONGODB_USER);
-    const password = getEnv(ENV_VARS.MONGODB_PASSWORD);
-    const domain = getEnv(ENV_VARS.MONGODB_URL);
-    const db = getEnv(ENV_VARS.MONGODB_DB);
-    const connectionURI = `mongodb+srv://${user}:${password}@${domain}/${db}?retryWrites=true&w=majority&appName=Cluster0`;
-    await mongoose.connect(connectionURI);
+    const user = getEnvVar('MONGODB_USER');
+    const pwd = getEnvVar('MONGODB_PASSWORD');
+    const url = getEnvVar('MONGODB_URL');
+    const db = getEnvVar('MONGODB_DB');
 
-    console.log('Connection successfully established!');
-  } catch (err) {
-    console.error('Connection issues', err);
-    process.exit(1);
+    await mongoose.connect(
+      `mongodb+srv://${user}:${pwd}@${url}/${db}?retryWrites=true&w=majority&appName=GoItKarpov`,
+    );
+    console.log('Mongo connection successfully established!');
+  } catch (e) {
+    console.log('Error while setting up mongo connection', e);
+    throw e;
   }
 };

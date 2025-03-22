@@ -1,22 +1,66 @@
-import bcrypt from 'bcryptjs';
+// src/services/auth.js
+
+import bcrypt from 'bcrypt';
 import createHttpError from 'http-errors';
+import { randomBytes } from 'crypto';
 import jwt from 'jsonwebtoken';
+
 import handlebars from 'handlebars';
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import { randomBytes } from 'crypto';
-import { UsersCollection } from '../db/models/User.js';
-import { SessionsCollection } from '../db/models/Session.js';
+
+import { UsersCollection } from '../db/models/user.js';
+import { SessionsCollection } from '../db/models/session.js';
+import {
+  FIFTEEN_MINUTES,
+  SMTP,
+  TEMPLATES_DIR,
+  THIRTY_DAYS,
+} from '../constants/index.js';
+import { getEnvVar } from '../utils/getEnvVar.js';
 import { sendEmail } from '../utils/sendMail.js';
-import { JWT, SMTP, TEMPLATES_DIR } from '../constants/index.js';
-import { ENV_VARS } from '../constants/env.js';
 
-const FIFTEEN_MINUTES = 15 * 60 * 1000;
-const ONE_DAY = 24 * 60 * 60 * 1000;
+export const registerUser = async (payload) => {
+  const user = await UsersCollection.findOne({ email: payload.email });
+  if (user) throw createHttpError(409, 'Email in use');
 
-/**
- * Создает новую сессию с accessToken и refreshToken
- */
+  const encryptedPassword = await bcrypt.hash(payload.password, 10);
+
+  return await UsersCollection.create({
+    ...payload,
+    password: encryptedPassword,
+  });
+};
+
+export const loginUser = async (payload) => {
+  const user = await UsersCollection.findOne({ email: payload.email });
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
+  const isEqual = await bcrypt.compare(payload.password, user.password);
+
+  if (!isEqual) {
+    throw createHttpError(401, 'Unauthorized');
+  }
+
+  await SessionsCollection.deleteOne({ userId: user._id });
+
+  const accessToken = randomBytes(30).toString('base64');
+  const refreshToken = randomBytes(30).toString('base64');
+
+  return await SessionsCollection.create({
+    userId: user._id,
+    accessToken,
+    refreshToken,
+    accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
+    refreshTokenValidUntil: new Date(Date.now() + THIRTY_DAYS),
+  });
+};
+
+export const logoutUser = async (sessionId) => {
+  await SessionsCollection.deleteOne({ _id: sessionId });
+};
+
 const createSession = () => {
   const accessToken = randomBytes(30).toString('base64');
   const refreshToken = randomBytes(30).toString('base64');
@@ -25,64 +69,11 @@ const createSession = () => {
     accessToken,
     refreshToken,
     accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
-    refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
+    refreshTokenValidUntil: new Date(Date.now() + THIRTY_DAYS),
   };
 };
 
-/**
- * Регистрация пользователя
- */
-const registerUser = async (payload) => {
-  const email = payload.email?.trim();
-  const password = payload.password?.trim();
-
-  if (!email || !password) {
-    throw createHttpError(400, 'Email and password are required');
-  }
-
-  const userExists = await UsersCollection.findOne({ email });
-  if (userExists) throw createHttpError(409, 'Email in use');
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  return await UsersCollection.create({
-    ...payload,
-    email,
-    password: hashedPassword,
-  });
-};
-
-/**
- * Вход пользователя
- */
-const loginUser = async (payload) => {
-  const email = payload.email?.trim();
-  const password = payload.password?.trim();
-
-  if (!email || !password) {
-    throw createHttpError(400, 'Email and password are required');
-  }
-
-  const user = await UsersCollection.findOne({ email });
-  if (!user) throw createHttpError(404, 'User not found');
-
-  const isPasswordCorrect = await bcrypt.compare(password, user.password);
-  if (!isPasswordCorrect) throw createHttpError(401, 'Unauthorized');
-
-  await SessionsCollection.deleteOne({ userId: user._id });
-
-  const newSession = createSession();
-
-  return await SessionsCollection.create({
-    userId: user._id,
-    ...newSession,
-  });
-};
-
-/**
- * Обновление сессии (refresh token)
- */
-const refreshUsersSession = async ({ sessionId, refreshToken }) => {
+export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
   const session = await SessionsCollection.findOne({
     _id: sessionId,
     refreshToken,
@@ -94,6 +85,7 @@ const refreshUsersSession = async ({ sessionId, refreshToken }) => {
 
   const isSessionTokenExpired =
     new Date() > new Date(session.refreshTokenValidUntil);
+
   if (isSessionTokenExpired) {
     throw createHttpError(401, 'Session token expired');
   }
@@ -108,72 +100,58 @@ const refreshUsersSession = async ({ sessionId, refreshToken }) => {
   });
 };
 
-/**
- * Выход пользователя (logout)
- */
-const logoutUser = async (sessionId) => {
-  if (!sessionId) {
-    throw createHttpError(400, 'Session ID is required');
-  }
-
-  await SessionsCollection.deleteOne({ _id: sessionId });
-};
-
-/**
- * Запрос токена сброса пароля
- */
 export const requestResetToken = async (email) => {
   const user = await UsersCollection.findOne({ email });
-
   if (!user) {
     throw createHttpError(404, 'User not found');
   }
+  const resetToken = jwt.sign(
+    {
+      sub: user._id,
+      email,
+    },
+    getEnvVar('JWT_SECRET'),
+    {
+      expiresIn: '15m',
+    },
+  );
 
-  const resetToken = jwt.sign({ sub: user._id, email }, JWT.JWT_SECRET, {
-    expiresIn: JWT.JWT_EXPIRES_IN,
-  });
-
-  // Читаем шаблон email
   const resetPasswordTemplatePath = path.join(
     TEMPLATES_DIR,
-    'reset-password-email.html'
+    'reset-password-email.html',
   );
-  const templateSource = await fs.readFile(resetPasswordTemplatePath, 'utf-8');
-  const template = handlebars.compile(templateSource);
 
-  // Генерируем HTML с персонализированными данными
+  const templateSource = (
+    await fs.readFile(resetPasswordTemplatePath)
+  ).toString();
+
+  const template = handlebars.compile(templateSource);
   const html = template({
     name: user.name,
-    link: `${ENV_VARS.APP_DOMAIN}/reset-password?token=${resetToken}`,
+    link: `${getEnvVar('APP_DOMAIN')}/reset-password?token=${resetToken}`,
   });
 
-  // Отправляем email
-  await sendEmail(user.email, 'Reset Your Password', html, {
-    from: SMTP.SMTP_FROM,
-    host: SMTP.SMTP_HOST,
-    port: SMTP.SMTP_PORT,
-    auth: {
-      user: SMTP.SMTP_USER,
-      pass: SMTP.SMTP_PASSWORD,
-    },
+  await sendEmail({
+    from: getEnvVar(SMTP.SMTP_FROM),
+    to: email,
+    subject: 'Reset your password',
+    html,
   });
 };
 
-/**
- * Сброс пароля
- */
 export const resetPassword = async (payload) => {
-  let decoded;
+  let entries;
+
   try {
-    decoded = jwt.verify(payload.token, ENV_VARS.JWT_SECRET);
-  } catch (error) {
-    console.error('JWT verification failed:', error);
-    throw createHttpError(401, 'Invalid or expired token');
+    entries = jwt.verify(payload.token, getEnvVar('JWT_SECRET'));
+  } catch (err) {
+    if (err instanceof Error) throw createHttpError(401, err.message);
+    throw err;
   }
 
   const user = await UsersCollection.findOne({
-    email: decoded.email,
-    _id: decoded.sub,
+    email: entries.email,
+    _id: entries.sub,
   });
 
   if (!user) {
@@ -181,13 +159,9 @@ export const resetPassword = async (payload) => {
   }
 
   const encryptedPassword = await bcrypt.hash(payload.password, 10);
+
   await UsersCollection.updateOne(
     { _id: user._id },
-    { password: encryptedPassword }
+    { password: encryptedPassword },
   );
 };
-
-/**
- * ✅ Экспорт всех функций
- */
-export { registerUser, loginUser, refreshUsersSession, logoutUser };

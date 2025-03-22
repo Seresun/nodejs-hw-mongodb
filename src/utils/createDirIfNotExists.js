@@ -1,21 +1,13 @@
-import path from 'node:path';
+// src/utils/createDirIfNotExists.js
+
 import fs from 'node:fs/promises';
-import { TEMP_UPLOAD_DIR, UPLOAD_DIR } from '../constants/index.js';
-import { getEnvVar } from './getEnv.js';
 
-export const createDirIfNotExists = async (dirPath) => {
+export const createDirIfNotExists = async (url) => {
   try {
-    await fs.access(dirPath);
-  } catch {
-    await fs.mkdir(dirPath, { recursive: true });
+    await fs.access(url);
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      await fs.mkdir(url);
+    }
   }
-};
-
-export const saveFileToUploadDir = async (file) => {
-  await fs.rename(
-    path.join(TEMP_UPLOAD_DIR, file.filename),
-    path.join(UPLOAD_DIR, file.filename)
-  );
-
-  return `${getEnvVar('APP_DOMAIN')}/uploads/${file.filename}`;
 };
