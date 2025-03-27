@@ -1,6 +1,4 @@
-// src/db/models/user.js
-
-import { model, Schema } from 'mongoose';
+import { model, Schema } from "mongoose";
 
 const usersSchema = new Schema(
   {
@@ -8,8 +6,7 @@ const usersSchema = new Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
   },
-
-  { timestamps: true, versionKey: false },
+  { timestamps: true, versionKey: false }
 );
 
 usersSchema.methods.toJSON = function () {
@@ -18,4 +15,4 @@ usersSchema.methods.toJSON = function () {
   return obj;
 };
 
-export const UsersCollection = model('users', usersSchema);
+export const UsersCollection = model("users", usersSchema);
