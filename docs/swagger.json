@@ -14,7 +14,7 @@
       "url": "http://localhost:3000"
     },
     {
-      "url": "https://nodejs-hw-mongodb-gsu4.onrender.com"
+      "url": "https://nodejs-hw-mongodb-7-gvmi.onrender.com/"
     }
   ],
   "tags": [
@@ -102,7 +102,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "201": {
             "description": "Get all contacts",
             "content": {
               "application/json": {
@@ -235,7 +235,7 @@
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "Creates a contact",
             "content": {
               "application/json": {
@@ -295,7 +295,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "201": {
             "description": "Get contact by id",
             "content": {
               "application/json": {
@@ -394,7 +394,7 @@
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "Patch contact",
             "content": {
               "application/json": {

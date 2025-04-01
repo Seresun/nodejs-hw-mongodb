@@ -37,8 +37,8 @@ requestBody:
             format: binary
 
 responses:
-  "200":
-    description: Creates a contact
+  '201':
+    description: Contact successfully created
     content:
       application/json:
         schema:
@@ -57,5 +57,7 @@ responses:
             data:
               type: object
               $ref: "../../components/schemas/contact.yaml"
-  "404":
-    $ref: "../../components/responses/404.yaml"
+  '400':
+    description: Bad Request - Invalid input data
+  '401':
+    description: Unauthorized - Authentication required

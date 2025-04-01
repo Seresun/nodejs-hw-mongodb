@@ -90,5 +90,5 @@ responses:
                 hasPreviousPage:
                   type: boolean
                   example: false
-  "404":
-    $ref: "../../components/responses/404.yaml"
+  "401":
+    description: Unauthorized - Authentication required
