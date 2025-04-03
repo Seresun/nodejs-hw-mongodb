@@ -1,8 +1,9 @@
+#swagger/paths/contacts/patch.yaml
 tags:
   - Contacts
-summary: Update contact
+summary: Update a contact
 operationId: updateContact
-description: 'Update contact by id with payload'
+description: Update an existing contact
 security:
   - bearerAuth: []
 parameters:
@@ -11,58 +12,45 @@ parameters:
     required: true
     schema:
       type: string
-      example: '67b91abbb180078c4327247d'
+    description: 'Contact ID'
 requestBody:
+  required: true
   content:
     multipart/form-data:
       schema:
         type: object
         properties:
           name:
-            description: "Contact's name"
             type: string
           phoneNumber:
-            description: 'Contact phone number'
             type: string
           email:
-            description: "Contact's email"
             type: string
           isFavourite:
-            description: "Contact's in the favourite list"
             type: boolean
           contactType:
-            description: "Contact's number type"
             type: string
             enum: ['work', 'home', 'personal']
           photo:
-            description: "Contact's photo"
             type: string
             format: binary
-
 responses:
   '200':
-    description: 'Patch contact'
+    description: Contact updated successfully
     content:
       application/json:
         schema:
           type: object
-          required:
-            - status
-            - message
-            - data
           properties:
             status:
               type: integer
               example: 200
             message:
               type: string
-              example: Successfully patched a contact!
+              example: 'Contact updated successfully'
             data:
-              type: object
               $ref: '../../../components/schemas/contact.yaml'
-  '400':
-    description: Bad Request - Invalid input data
   '401':
-    description: Unauthorized - Authentication required
+    $ref: '../../../components/responses/401.yaml'
   '404':
-    $ref: '../../../components/responses/404.yaml'
+    description: Contact not found
