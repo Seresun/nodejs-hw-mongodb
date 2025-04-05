@@ -1,12 +1,12 @@
 tags:
   - Contacts
-summary: Update contact by ID
+summary: Update contact by id
 operationId: updateContactById
-description: Update the details of a contact by its ID.
+description: Update the details of a contact by its id.
 security:
   - bearerAuth: []
 parameters:
-  - name: Id
+  - name: id
     in: path
     required: true
     schema:
@@ -16,14 +16,14 @@ requestBody:
   content:
     application/json:
       schema:
-        $ref: '../../../components/schemas/Contact.yaml'
+        $ref: ../../../components/schemas/contact.yaml
 responses:
   '200':
     description: Contact updated successfully
     content:
       application/json:
         schema:
-          $ref: '../../../components/schemas/Contact.yaml'
+          $ref: ../../../components/schemas/contact.yaml
   '400':
     description: Bad Request - Invalid input data
     content:

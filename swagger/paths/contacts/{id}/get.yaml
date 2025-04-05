@@ -6,7 +6,7 @@ description: Retrieve contact information by its unique ID.
 security:
   - bearerAuth: []
 parameters:
-  - name: contactId
+  - name: id
     in: path
     required: true
     schema:
@@ -17,7 +17,7 @@ responses:
     content:
       application/json:
         schema:
-          $ref: '../../../components/schemas/Contact.yaml'
+          $ref: ../../../components/schemas/contact.yaml
   '401':
     description: Unauthorized - Authentication required
     content:

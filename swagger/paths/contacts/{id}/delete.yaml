@@ -1,12 +1,12 @@
 tags:
   - Contacts
-summary: Delete contact by ID
+summary: Delete contact by id
 operationId: deleteContactById
-description: Delete a contact by its ID.
+description: Delete a contact by its id.
 security:
   - bearerAuth: []
 parameters:
-  - name: Id
+  - name: id
     in: path
     required: true
     schema:

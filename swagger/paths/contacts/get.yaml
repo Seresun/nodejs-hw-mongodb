@@ -19,7 +19,7 @@ responses:
         schema:
           type: array
           items:
-            $ref: '../../components/schemas/Contact.yaml'
+            $ref: ../../components/schemas/contact.yaml
   '401':
     description: Unauthorized - Authentication required
     content:

@@ -56,7 +56,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Contact"
+                    "$ref": "#/components/schemas/contact"
                   }
                 }
               }
@@ -105,7 +105,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Contact"
+                "$ref": "#/components/schemas/contact"
               }
             }
           }
@@ -116,7 +116,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Contact"
+                  "$ref": "#/components/schemas/contact"
                 }
               }
             }
@@ -172,7 +172,7 @@
         }
       }
     },
-    "/contacts/{contactId}": {
+    "/contacts/{id}": {
       "get": {
         "tags": [
           "Contacts"
@@ -187,7 +187,7 @@
         ],
         "parameters": [
           {
-            "name": "contactId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -201,7 +201,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Contact"
+                  "$ref": "#/components/schemas/contact"
                 }
               }
             }
@@ -260,9 +260,9 @@
         "tags": [
           "Contacts"
         ],
-        "summary": "Update contact by ID",
+        "summary": "Update contact by id",
         "operationId": "updateContactById",
-        "description": "Update the details of a contact by its ID.",
+        "description": "Update the details of a contact by its id.",
         "security": [
           {
             "bearerAuth": []
@@ -270,7 +270,7 @@
         ],
         "parameters": [
           {
-            "name": "contactId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -283,7 +283,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Contact"
+                "$ref": "#/components/schemas/contact"
               }
             }
           }
@@ -294,7 +294,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Contact"
+                  "$ref": "#/components/schemas/contact"
                 }
               }
             }
@@ -377,9 +377,9 @@
         "tags": [
           "Contacts"
         ],
-        "summary": "Delete contact by ID",
+        "summary": "Delete contact by id",
         "operationId": "deleteContactById",
-        "description": "Delete a contact by its ID.",
+        "description": "Delete a contact by its id.",
         "security": [
           {
             "bearerAuth": []
@@ -387,7 +387,7 @@
         ],
         "parameters": [
           {
-            "name": "contactId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -472,7 +472,7 @@
       }
     },
     "schemas": {
-      "Contact": {
+      "contact": {
         "type": "object",
         "required": [
           "_id",

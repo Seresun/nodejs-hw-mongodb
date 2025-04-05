@@ -10,14 +10,14 @@ requestBody:
   content:
     application/json:
       schema:
-        $ref: '../../components/schemas/Contact.yaml'
+        $ref: ../../components/schemas/contact.yaml
 responses:
   '201':
     description: Contact created successfully
     content:
       application/json:
         schema:
-          $ref: '../../components/schemas/Contact.yaml'
+          $ref: ../../components/schemas/contact.yaml
   '400':
     description: Bad Request - Invalid input data
     content:
