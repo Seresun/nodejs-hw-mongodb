@@ -1,96 +1,38 @@
-#swagger/paths/contacts/get.yaml
 tags:
   - Contacts
-summary: Get list of contacts
-operationId: getContacts
-description: Retrieve a list of contacts with filters, sorting, and pagination
+summary: Get all contacts
+operationId: getAllContacts
+description: Retrieve the list of all contacts. Supports filtering by favorite status.
 security:
   - bearerAuth: []
 parameters:
   - in: query
-    name: page
-    description: Page number for pagination
-    required: false
+    name: favorite
     schema:
-      type: integer
-      example: 1
-  - in: query
-    name: perPage
-    description: Number of contacts per page
-    required: false
-    schema:
-      type: integer
-      example: 10
-  - in: query
-    name: sortBy
-    description: Sort contacts by field
-    required: false
-    schema:
-      type: string
-      enum:
-        - _id
-        - name
-        - email
-        - phoneNumber
-        - isFavourite
-        - contactType
-        - createdAt
-        - updatedAt
-      default: name
-  - in: query
-    name: sortOrder
-    description: Sorting order
-    required: false
-    schema:
-      type: string
-      enum:
-        - asc
-        - desc
-      default: asc
-  - in: query
-    name: filter
-    description: Filter contacts by type
-    required: false
-    schema:
-      type: string
-      enum:
-        - work
-        - home
-        - personal
-      default: work
+      type: boolean
+    description: Filter contacts by favorite status
 responses:
   '200':
-    description: Successfully retrieved contacts
+    description: Successful response
     content:
       application/json:
         schema:
-          type: object
-          properties:
-            status:
-              type: integer
-              example: 200
-            message:
-              type: string
-              example: 'Contacts fetched successfully'
-            data:
-              type: array
-              items:
-                $ref: '../../components/schemas/contact.yaml'
+          type: array
+          items:
+            $ref: '../../components/schemas/Contact.yaml'
   '401':
-    $ref: '../../components/responses/401.yaml'
-  '404':
-    description: Contacts not found
+    description: Unauthorized - Authentication required
     content:
       application/json:
         schema:
           type: object
           properties:
             status:
+              type: string
+              example: "error"
+            code:
               type: integer
-              example: 404
+              example: 401
             message:
               type: string
-              example: 'No contacts found'
-            data:
-              type: object
-              example: {}
+              example: "Unauthorized"

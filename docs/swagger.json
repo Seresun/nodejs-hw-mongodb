@@ -30,9 +30,9 @@
         "tags": [
           "Contacts"
         ],
-        "summary": "Get list of contacts",
-        "operationId": "getContacts",
-        "description": "Retrieve a list of contacts with filters, sorting, and pagination",
+        "summary": "Get all contacts",
+        "operationId": "getAllContacts",
+        "description": "Retrieve the list of all contacts. Supports filtering by favorite status.",
         "security": [
           {
             "bearerAuth": []
@@ -41,122 +41,45 @@
         "parameters": [
           {
             "in": "query",
-            "name": "page",
-            "description": "Page number for pagination",
-            "required": false,
+            "name": "favorite",
             "schema": {
-              "type": "integer",
-              "example": 1
-            }
-          },
-          {
-            "in": "query",
-            "name": "perPage",
-            "description": "Number of contacts per page",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "example": 10
-            }
-          },
-          {
-            "in": "query",
-            "name": "sortBy",
-            "description": "Sort contacts by field",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "_id",
-                "name",
-                "email",
-                "phoneNumber",
-                "isFavourite",
-                "contactType",
-                "createdAt",
-                "updatedAt"
-              ],
-              "default": "name"
-            }
-          },
-          {
-            "in": "query",
-            "name": "sortOrder",
-            "description": "Sorting order",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "asc"
-            }
-          },
-          {
-            "in": "query",
-            "name": "filter",
-            "description": "Filter contacts by type",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "work",
-                "home",
-                "personal"
-              ],
-              "default": "work"
-            }
+              "type": "boolean"
+            },
+            "description": "Filter contacts by favorite status"
           }
         ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved contacts",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "integer",
-                      "example": 200
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Contacts fetched successfully"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/contact"
-                      }
-                    }
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Contact"
                   }
                 }
               }
             }
           },
           "401": {
-            "$ref": "#/components/responses/401"
-          },
-          "404": {
-            "description": "Contacts not found",
+            "description": "Unauthorized - Authentication required",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "code": {
                       "type": "integer",
-                      "example": 404
+                      "example": 401
                     },
                     "message": {
                       "type": "string",
-                      "example": "No contacts found"
-                    },
-                    "data": {
-                      "type": "object",
-                      "example": {}
+                      "example": "Unauthorized"
                     }
                   }
                 }
@@ -171,7 +94,7 @@
         ],
         "summary": "Create a new contact",
         "operationId": "createContact",
-        "description": "Create a contact record",
+        "description": "Add a new contact to the contact list.",
         "security": [
           {
             "bearerAuth": []
@@ -180,45 +103,9 @@
         "requestBody": {
           "required": true,
           "content": {
-            "multipart/form-data": {
+            "application/json": {
               "schema": {
-                "type": "object",
-                "required": [
-                  "name",
-                  "phoneNumber",
-                  "contactType"
-                ],
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "example": "John Doe"
-                  },
-                  "phoneNumber": {
-                    "type": "string",
-                    "example": "+380971234567"
-                  },
-                  "email": {
-                    "type": "string",
-                    "example": "johndoe@email.com"
-                  },
-                  "isFavourite": {
-                    "type": "boolean",
-                    "example": false
-                  },
-                  "contactType": {
-                    "type": "string",
-                    "enum": [
-                      "work",
-                      "home",
-                      "personal"
-                    ],
-                    "example": "work"
-                  },
-                  "photo": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                }
+                "$ref": "#/components/schemas/Contact"
               }
             }
           }
@@ -229,18 +116,29 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "$ref": "#/components/schemas/Contact"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input data",
+            "content": {
+              "application/json": {
+                "schema": {
                   "type": "object",
                   "properties": {
                     "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "code": {
                       "type": "integer",
-                      "example": 201
+                      "example": 400
                     },
                     "message": {
                       "type": "string",
-                      "example": "Contact created successfully"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/contact"
+                      "example": "Missing required field"
                     }
                   }
                 }
@@ -248,19 +146,40 @@
             }
           },
           "401": {
-            "$ref": "#/components/responses/401"
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 401
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
-    "/contacts/{id}": {
+    "/contacts/{contactId}": {
       "get": {
         "tags": [
           "Contacts"
         ],
-        "summary": "Get one contact",
+        "summary": "Get contact by ID",
         "operationId": "getContactById",
-        "description": "Get contact by id",
+        "description": "Retrieve contact information by its unique ID.",
         "security": [
           {
             "bearerAuth": []
@@ -268,50 +187,72 @@
         ],
         "parameters": [
           {
+            "name": "contactId",
             "in": "path",
-            "name": "id",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "67b91abbb180078c4327247d"
+              "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Get contact by id",
+            "description": "Contact retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Contact"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "status",
-                    "message",
-                    "data"
-                  ],
                   "properties": {
                     "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "code": {
                       "type": "integer",
-                      "example": 200
+                      "example": 401
                     },
                     "message": {
                       "type": "string",
-                      "example": "Successfully found contact with id 67b91abbb180078c4327247d!"
-                    },
-                    "data": {
-                      "type": "object",
-                      "$ref": "#/components/schemas/contact"
+                      "example": "Unauthorized"
                     }
                   }
                 }
               }
             }
           },
-          "401": {
-            "description": "Unauthorized - Authentication required"
-          },
           "404": {
-            "$ref": "#/components/responses/404"
+            "description": "Contact not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Not found"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -319,9 +260,9 @@
         "tags": [
           "Contacts"
         ],
-        "summary": "Update a contact",
-        "operationId": "updateContact",
-        "description": "Update an existing contact",
+        "summary": "Update contact by ID",
+        "operationId": "updateContactById",
+        "description": "Update the details of a contact by its ID.",
         "security": [
           {
             "bearerAuth": []
@@ -329,47 +270,20 @@
         ],
         "parameters": [
           {
+            "name": "contactId",
             "in": "path",
-            "name": "id",
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "Contact ID"
+            }
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
-            "multipart/form-data": {
+            "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "phoneNumber": {
-                    "type": "string"
-                  },
-                  "email": {
-                    "type": "string"
-                  },
-                  "isFavourite": {
-                    "type": "boolean"
-                  },
-                  "contactType": {
-                    "type": "string",
-                    "enum": [
-                      "work",
-                      "home",
-                      "personal"
-                    ]
-                  },
-                  "photo": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                }
+                "$ref": "#/components/schemas/Contact"
               }
             }
           }
@@ -380,18 +294,29 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "$ref": "#/components/schemas/Contact"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input data",
+            "content": {
+              "application/json": {
+                "schema": {
                   "type": "object",
                   "properties": {
                     "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "code": {
                       "type": "integer",
-                      "example": 200
+                      "example": 400
                     },
                     "message": {
                       "type": "string",
-                      "example": "Contact updated successfully"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/contact"
+                      "example": "Missing required field"
                     }
                   }
                 }
@@ -399,10 +324,52 @@
             }
           },
           "401": {
-            "$ref": "#/components/responses/401"
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 401
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
           },
           "404": {
-            "description": "Contact not found"
+            "description": "Contact not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Not found"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -410,9 +377,9 @@
         "tags": [
           "Contacts"
         ],
-        "summary": "Delete contact",
-        "operationId": "deleteContact",
-        "description": "Delete contact by id",
+        "summary": "Delete contact by ID",
+        "operationId": "deleteContactById",
+        "description": "Delete a contact by its ID.",
         "security": [
           {
             "bearerAuth": []
@@ -420,24 +387,78 @@
         ],
         "parameters": [
           {
+            "name": "contactId",
             "in": "path",
-            "name": "id",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "67b0fd192c52b0bb492610f1"
+              "type": "string"
             }
           }
         ],
         "responses": {
-          "204": {
-            "description": "Contact deleted!"
+          "200": {
+            "description": "Contact deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Contact deleted"
+                    }
+                  }
+                }
+              }
+            }
           },
           "401": {
-            "description": "Unauthorized - Authentication required"
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 401
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
           },
           "404": {
-            "$ref": "#/components/responses/404"
+            "description": "Contact not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Not found"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -451,7 +472,7 @@
       }
     },
     "schemas": {
-      "contact": {
+      "Contact": {
         "type": "object",
         "required": [
           "_id",
@@ -505,82 +526,6 @@
             "description": "Link to contact's photo",
             "type": "string",
             "example": "https://res.cloudinary.com/dvif0vgik/image/upload/v1740223192/vsaidgqxwiorqg674xcd.jpg"
-          }
-        }
-      }
-    },
-    "responses": {
-      "401": {
-        "description": "Unauthorized error",
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "required": [
-                "status",
-                "message",
-                "data"
-              ],
-              "properties": {
-                "status": {
-                  "type": "integer",
-                  "example": 401
-                },
-                "message": {
-                  "type": "string",
-                  "example": "UnauthorizedError"
-                },
-                "data": {
-                  "type": "object",
-                  "required": [
-                    "message"
-                  ],
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "example": "Access token expired"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "404": {
-        "description": "Not Found Error",
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "required": [
-                "status",
-                "message",
-                "data"
-              ],
-              "properties": {
-                "status": {
-                  "type": "integer",
-                  "example": 404
-                },
-                "message": {
-                  "type": "string",
-                  "example": "NotFoundError"
-                },
-                "data": {
-                  "type": "object",
-                  "required": [
-                    "message"
-                  ],
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "example": "Contact not found"
-                    }
-                  }
-                }
-              }
-            }
           }
         }
       }
