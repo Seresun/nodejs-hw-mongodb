@@ -6,7 +6,7 @@ description: Delete a contact by its ID.
 security:
   - bearerAuth: []
 parameters:
-  - name: contactId
+  - name: Id
     in: path
     required: true
     schema:
