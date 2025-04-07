@@ -9,33 +9,26 @@ properties:
   _id:
     description: "Contact's id"
     type: string
-    example: 67b0dc18bf7dbe8085fc4731
+    example: 65e4decdd286b30065d54af9
   name:
     description: "Contact's name"
     type: string
-    example: "John Doe"
-  phoneNumber:
-    description: "Contact phone number"
-    type: string
-    example: "+312645654654645"
+    example: 'John Doe'
   email:
     description: "Contact's email"
     type: string
-    example: "joe@joe.com"
+    example: example@mail.com
   isFavourite:
-    description: "Contact's in the favourite list"
+    description: "Contact's isFavourite"
     type: boolean
-    example: true
   contactType:
-    description: "Contact's number type"
+    description: "Contact's contact type"
     type: string
-    enum: ["work", "home", "personal"]
-    example: personal
+    enum: ['work', 'home', 'personal']
   userId:
-    description: "Contact's user id"
+    description: "Contact's parent id"
     type: string
-    example: 67b79da80a25c2485e000a75
   photo:
     description: "Link to contact's photo"
     type: string
-    example: https://res.cloudinary.com/dvif0vgik/image/upload/v1740223192/vsaidgqxwiorqg674xcd.jpg
+    example: https://res.cloudinary.com/uqwgdu/image/upload/image.png

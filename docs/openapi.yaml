@@ -1,16 +1,14 @@
 openapi: 3.1.0
 info:
   version: 1.0.0
-  title: Contacts Application
+  title: Contacts app
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  description: This application created contacts
+  description: This is a documentation of contacts app
 tags:
   - name: Contacts
-    description: Contacts operations
-  - name: Auth
-    description: Auth operations
+    description: Operation about contacts.
 servers:
   - url: https://nodejs-hw-mongodb-7-gvmi.onrender.com
 paths:
