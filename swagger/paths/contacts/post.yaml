@@ -41,7 +41,7 @@ requestBody:
             format: binary
 responses:
   '201':
-    description: Creates a contact
+    description: Successfully created a new contact
     content:
       application/json:
         schema:
@@ -53,12 +53,14 @@ responses:
           properties:
             status:
               type: integer
-              example: 201
+              example: '201'
             message:
               type: string
-              example: Successfully created a contact!
+              example: Successfully created a contact
             data:
               type: object
               $ref: ../../components/schemas/contact.yaml
   '401':
     $ref: ../../components/responses/401.yaml
+  '400':
+    $ref: ../../components/responses/400.yaml
