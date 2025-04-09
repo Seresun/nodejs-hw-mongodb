@@ -439,8 +439,8 @@
           "Contacts"
         ],
         "summary": "Delete contact by id",
-        "operationId": "deleteContactById",
-        "description": "Delete a contact by its id.",
+        "operationId": "deleteContact",
+        "description": "Delete contact by id",
         "security": [
           {
             "bearerAuth": []
@@ -448,25 +448,37 @@
         ],
         "parameters": [
           {
-            "name": "id",
             "in": "path",
+            "name": "id",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "example": "65ca67e7ae7f10c88b598384"
             }
           }
         ],
         "responses": {
-          "200": {
-            "description": "Contact deleted successfully",
+          "204": {
+            "description": "Delete a contact by id!"
+          },
+          "400": {
+            "description": "Bad Request - Invalid ID format",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 400
+                    },
                     "message": {
                       "type": "string",
-                      "example": "Contact deleted"
+                      "example": "Invalid contact ID"
                     }
                   }
                 }
@@ -474,52 +486,10 @@
             }
           },
           "401": {
-            "description": "Unauthorized - Authentication required",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "example": "error"
-                    },
-                    "code": {
-                      "type": "integer",
-                      "example": 401
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Unauthorized"
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/401"
           },
           "404": {
-            "description": "Contact not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "example": "error"
-                    },
-                    "code": {
-                      "type": "integer",
-                      "example": 404
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Not found"
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/404"
           }
         }
       }
